@@ -1,0 +1,6 @@
+# arquivos locais que não vão para o site público
+*.pdf
+*.xlsx
+*.log
+Thumbs.db
+desktop.ini
