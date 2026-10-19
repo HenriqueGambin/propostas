@@ -484,6 +484,33 @@ function pedirNovaSenha() {
    ================================================================ */
 const nomeUsuario = () => (S.user && ((S.user.user_metadata || {}).nome || String(S.user.email || '').split('@')[0])) || 'Usuário';
 
+/* ---------- instalar como aplicativo ---------- */
+let promptInstalar = null;
+const jaInstalado = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const ehIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const mostrarInstalar = () => !jaInstalado() && (!!promptInstalar || ehIOS());
+function atualizarBotaoInstalar() { const b = $('#btn-instalar'); if (b) b.classList.toggle('hidden', !mostrarInstalar()); }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); promptInstalar = e; atualizarBotaoInstalar(); });
+window.addEventListener('appinstalled', () => { promptInstalar = null; atualizarBotaoInstalar(); toast('Aplicativo instalado.'); });
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* sem app offline */ }));
+}
+async function instalarApp() {
+  if (promptInstalar) {
+    promptInstalar.prompt();
+    await promptInstalar.userChoice;
+    promptInstalar = null; atualizarBotaoInstalar();
+    return;
+  }
+  modal({
+    titulo: 'Instalar aplicativo', tamanho: 'sm',
+    corpo: ehIOS()
+      ? `<ol class="passos"><li>Abra este site no <b>Safari</b>.</li><li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima).</li><li>Escolha <b>Adicionar à Tela de Início</b> e toque em <b>Adicionar</b>.</li></ol>`
+      : `<ol class="passos"><li>No Chrome ou no Edge, abra o menu <b>⋮</b> no canto de cima.</li><li>Escolha <b>Instalar Propostas Dello</b> (ou “Transmitir, salvar e compartilhar → Instalar página como app”).</li></ol>`,
+    rodape: '<button type="button" class="btn primary" data-cancelar>Entendi</button>',
+  });
+}
+
 function renderShell() {
   root.innerHTML = `<div class="shell">
     <aside class="side">
@@ -498,6 +525,7 @@ function renderShell() {
       </nav>
       <div class="foot">
         ${S.api.demo ? '<div class="demo-flag">Modo demonstração · dados salvos só neste navegador</div>' : ''}
+        <button type="button" class="instalar${mostrarInstalar() ? '' : ' hidden'}" id="btn-instalar">${ic('download')}<span>Instalar aplicativo</span></button>
         <div class="user">
           <div class="avatar">${esc(iniciais(nomeUsuario()))}</div>
           <div><div class="nm">${esc(nomeUsuario())}</div><div class="em">${esc(S.user.email || '')}</div></div>
@@ -516,6 +544,7 @@ function renderShell() {
   </div>`;
   $('#btn-menu').onclick = () => $('.shell').classList.toggle('menu-aberto');
   $('.shell').addEventListener('click', e => { if (e.target.classList.contains('shell') || e.target.closest('.side a')) $('.shell').classList.remove('menu-aberto'); });
+  $('#btn-instalar').onclick = instalarApp;
   $('#btn-sair').onclick = async () => {
     if (S.api.demo) { if (await confirmar('Apagar as alterações e voltar aos dados de exemplo?', { titulo: 'Reiniciar demonstração', ok: 'Reiniciar' })) S.api.sair(); return; }
     if (await confirmar('Deseja sair da sua conta neste aparelho?', { titulo: 'Sair', ok: 'Sair' })) { await S.api.sair(); S.user = null; renderAuth(); }
