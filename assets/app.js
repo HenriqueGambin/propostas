@@ -488,7 +488,10 @@ const nomeUsuario = () => (S.user && ((S.user.user_metadata || {}).nome || Strin
 let promptInstalar = null;
 const jaInstalado = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const ehIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const mostrarInstalar = () => !jaInstalado() && (!!promptInstalar || ehIOS());
+// o Chrome só libera a instalação automática depois de um tempo usando a página (e pode não liberar se outro app
+// do mesmo endereço já estiver instalado), então o botão fica sempre visível e, sem o aviso, mostra o caminho pelo menu
+const mostrarInstalar = () => !jaInstalado();
+const ehAndroid = () => /android/i.test(navigator.userAgent);
 function atualizarBotaoInstalar() { const b = $('#btn-instalar'); if (b) b.classList.toggle('hidden', !mostrarInstalar()); }
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); promptInstalar = e; atualizarBotaoInstalar(); });
 window.addEventListener('appinstalled', () => { promptInstalar = null; atualizarBotaoInstalar(); toast('Aplicativo instalado.'); });
@@ -506,7 +509,10 @@ async function instalarApp() {
     titulo: 'Instalar aplicativo', tamanho: 'sm',
     corpo: ehIOS()
       ? `<ol class="passos"><li>Abra este site no <b>Safari</b>.</li><li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima).</li><li>Escolha <b>Adicionar à Tela de Início</b> e toque em <b>Adicionar</b>.</li></ol>`
-      : `<ol class="passos"><li>No Chrome ou no Edge, abra o menu <b>⋮</b> no canto de cima.</li><li>Escolha <b>Instalar Propostas Dello</b> (ou “Transmitir, salvar e compartilhar → Instalar página como app”).</li></ol>`,
+      : ehAndroid()
+        ? `<ol class="passos"><li>No Chrome, toque no menu <b>⋮</b> no canto de cima.</li><li>Escolha <b>Instalar app</b> (ou <b>Adicionar à tela inicial</b>).</li><li>Confirme em <b>Instalar</b>. O ícone “Propostas Dello” aparece na tela inicial.</li></ol>`
+        : `<ol class="passos"><li>No Chrome, clique no menu <b>⋮</b> no canto de cima, à direita.</li><li>Vá em <b>Transmitir, salvar e compartilhar</b> → <b>Instalar página como app…</b></li><li>Deixe o nome <b>Propostas Dello</b>, marque <b>Abrir como janela</b> e clique em <b>Instalar</b>.</li></ol>
+           <p class="muted small" style="margin:12px 0 0">No Edge: menu <b>…</b> → <b>Aplicativos</b> → <b>Instalar este site como um aplicativo</b>.</p>`,
     rodape: '<button type="button" class="btn primary" data-cancelar>Entendi</button>',
   });
 }
