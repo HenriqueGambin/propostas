@@ -58,9 +58,10 @@ supabase/schema.sql      tabelas (propostas, clientes, config) e regras de acess
 
 ## Publicação
 
-- Site: **https://dello-eventos.github.io/propostas/** (demonstração: `https://dello-eventos.github.io/propostas/?demo`).
-- GitHub Pages da organização `dello-eventos`, repositório `propostas`, ramo `main`. Basta dar `git push` que o site atualiza em cerca de 1 minuto.
-- Mesmo endereço e mesmo Supabase do app de eventos: quem entra em um já fica logado no outro.
-- Supabase → Authentication → URL Configuration: Redirect URL `https://dello-eventos.github.io/propostas/**` (para o link de "esqueci minha senha").
+- Site: **https://henriquegambin.github.io/propostas/** (demonstração: `https://henriquegambin.github.io/propostas/?demo`).
+- GitHub Pages da conta `HenriqueGambin`, repositório `propostas`, ramo `main` (remote `origin`). Basta dar `git push` que o site atualiza em cerca de 1 minuto.
+- Instala como aplicativo (botão "Instalar aplicativo" no menu). Não pode ficar dentro de `dello-eventos.github.io`: o app de eventos instalado cobre o endereço inteiro e o Chrome não deixa instalar outro app ali. Pelo mesmo motivo, não criar um site com manifest na raiz `henriquegambin.github.io`.
+- Endereço antigo `dello-eventos.github.io/propostas/` (repositório `dello-eventos/propostas`, remote `antigo`) só redireciona para o novo.
+- Supabase → Authentication → URL Configuration: Redirect URL `https://henriquegambin.github.io/propostas/**` (para o link de "esqueci minha senha").
 
 Ao mudar CSS/JS, troque o `?v=` em `index.html` para o navegador não usar a versão antiga.
